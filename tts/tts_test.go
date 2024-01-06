@@ -5,28 +5,23 @@ import (
 	"testing"
 )
 
-// TestMakeAPIRequest tests the makeAPIRequest function.
 func TestMakeAPIRequest(t *testing.T) {
+	// Set up a dummy input text
+	inputText := "Hello World. This is a test."
 	// Make the API request
-	resp, err := MakeAPIRequest() // Replace with your actual function call
+	responseBytes, err := makeAPIRequest(inputText)
 	if err != nil {
 		t.Fatalf("API request failed: %v", err)
 	}
-	defer resp.Body.Close()
 
-	// Check response headers
-	if contentType := resp.Header.Get("Content-Type"); contentType != "audio/mpeg" {
-		t.Errorf("Expected Content-Type to be audio/mpeg, got %s", contentType)
-	}
-
-	// Check file size (example: file should be less than 5MB)
-	if resp.ContentLength > 5*1024*1024 {
-		t.Errorf("Expected file size to be less than 5MB, got %d bytes", resp.ContentLength)
+	// Check if responseBytes is not empty (simple validation)
+	if len(responseBytes) == 0 {
+		t.Errorf("Expected non-empty response, got empty bytes")
 	}
 }
 
 // TestMain tests the main function.
-func TestMain(t *testing.T) {
+func TestMainFunction(t *testing.T) {
 	// Set up necessary environment variables and command line arguments
 	os.Setenv("OPENAI_API_KEY", "testapikey")
 	defer os.Unsetenv("OPENAI_API_KEY")
