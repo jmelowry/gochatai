@@ -10,27 +10,21 @@ import (
 
 // TestMakeAPIRequest tests the makeAPIRequest function.
 func TestMakeAPIRequest(t *testing.T) {
-	// Mock the HTTP server
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Write a dummy response (binary data)
-		w.Write([]byte{0x74, 0x65, 0x73, 0x74, 0x20, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65}) // "test response" in bytes
-	}))
-	defer ts.Close()
-
-	// Use the mocked server URL
-	originalURL := url
-	url = ts.URL
-	defer func() { url = originalURL }()
-
-	// Call the function under test
-	result, err := makeAPIRequest("test input")
+	// Make the API request
+	resp, err := MakeAPIRequest() // Replace with your actual function call
 	if err != nil {
-		t.Errorf("makeAPIRequest returned an error: %v", err)
+		t.Fatalf("API request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check response headers
+	if contentType := resp.Header.Get("Content-Type"); contentType != "audio/mpeg" {
+		t.Errorf("Expected Content-Type to be audio/mpeg, got %s", contentType)
 	}
 
-	expected := []byte("test response")
-	if !bytes.Equal(result, expected) {
-		t.Errorf("Expected '%v', got '%v'", expected, result)
+	// Check file size (example: file should be less than 5MB)
+	if resp.ContentLength > 5*1024*1024 {
+		t.Errorf("Expected file size to be less than 5MB, got %d bytes", resp.ContentLength)
 	}
 }
 
