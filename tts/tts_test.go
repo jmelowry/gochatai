@@ -11,8 +11,8 @@ import (
 func TestMakeAPIRequest(t *testing.T) {
 	// Mock the HTTP server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Write a dummy response
-		w.Write([]byte("test response"))
+		// Write a dummy response (binary data)
+		w.Write([]byte{0x74, 0x65, 0x73, 0x74, 0x20, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65}) // "test response" in bytes
 	}))
 	defer ts.Close()
 
@@ -26,8 +26,10 @@ func TestMakeAPIRequest(t *testing.T) {
 	if err != nil {
 		t.Errorf("makeAPIRequest returned an error: %v", err)
 	}
-	if string(result) != "test response" {
-		t.Errorf("Expected 'test response', got '%s'", string(result))
+
+	expected := []byte("test response")
+	if !bytes.Equal(result, expected) {
+		t.Errorf("Expected '%v', got '%v'", expected, result)
 	}
 }
 
