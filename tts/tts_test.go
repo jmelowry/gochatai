@@ -1,11 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"strings"
 	"testing"
 )
 
@@ -28,7 +25,7 @@ func TestMakeAPIRequest(t *testing.T) {
 	if err != nil {
 		t.Errorf("makeAPIRequest returned an error: %v", err)
 	}
-	if !bytes.Equal(result, []byte("test response")) {
+	if string(result) != "test response" {
 		t.Errorf("Expected 'test response', got '%s'", string(result))
 	}
 }

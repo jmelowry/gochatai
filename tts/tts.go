@@ -17,6 +17,8 @@ var (
 	noSave bool
 	voice  string
 	apiKey string
+	url    string = "https://api.openai.com/v1/audio/speech" // Default API endpoint
+
 )
 
 func init() {
