@@ -10,10 +10,13 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-// runChat handles the chat logic, can be tested with different io.Reader and io.Writer
-func runChat(input io.Reader, output io.Writer, apiKey string) error {
-	client := openai.NewClient(apiKey)
+// OpenAIClient defines the interface for an OpenAI client.
+type OpenAIClient interface {
+	CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (*openai.ChatCompletionResponse, error)
+}
 
+// runChat handles the chat logic, can be tested with different io.Reader and io.Writer
+func runChat(input io.Reader, output io.Writer, client OpenAIClient) error {
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		userInput := scanner.Text()
@@ -45,7 +48,19 @@ func runChat(input io.Reader, output io.Writer, apiKey string) error {
 
 func main() {
 	apiKey := os.Getenv("OPENAI_API_KEY")
-	if err := runChat(os.Stdin, os.Stdout, apiKey); err != nil {
+	client := openai.NewClient(apiKey)
+	if err := runChat(os.Stdin, os.Stdout, client); err != nil {
 		fmt.Fprintf(os.Stderr, "runChat error: %v\n", err)
 	}
+}
+
+func (m *MockOpenAIClient) CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (*openai.ChatCompletionResponse, error) {
+	// Return a mock response
+	return &openai.ChatCompletionResponse{
+		Choices: []openai.Choice{
+			{
+				Message: openai.Message{Content: "mock response"},
+			},
+		},
+	}, nil
 }
