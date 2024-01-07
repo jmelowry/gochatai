@@ -56,8 +56,8 @@ func TestRunChat(t *testing.T) {
 	}
 
 	// Verify the output
-	expectedOutputPart := "Hello, world!" // Adjust based on expected output
+	expectedOutputPart := "Audio file saved as:" // Adjust based on expected output
 	if !strings.Contains(string(output), expectedOutputPart) {
-		t.Errorf("Expected output to contain %q, got %q", expectedOutputPart, output)
+		t.Errorf("Expected output to contain %q, got %q", expectedOutputPart, string(output))
 	}
 }
