@@ -1,45 +1,63 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
-func TestMakeAPIRequest(t *testing.T) {
-	// Set up a dummy input text
-	inputText := "Hello World. This is a test."
-	// Make the API request
-	responseBytes, err := makeAPIRequest(inputText)
+func TestRunChat(t *testing.T) {
+	// Create a temporary file to simulate stdin
+	tempInputFile, err := ioutil.TempFile("", "test_stdin")
 	if err != nil {
-		t.Fatalf("API request failed: %v", err)
+		t.Fatalf("Failed to create temp file for stdin: %v", err)
+	}
+	defer os.Remove(tempInputFile.Name()) // Clean up
+
+	// Write test input to temp file
+	testInput := "Hello, world!"
+	if _, err := tempInputFile.WriteString(testInput); err != nil {
+		t.Fatalf("Failed to write to temp stdin file: %v", err)
 	}
 
-	// Check if responseBytes is not empty (simple validation)
-	if len(responseBytes) == 0 {
-		t.Errorf("Expected non-empty response, got empty bytes")
+	// Reset file offset to the beginning
+	if _, err := tempInputFile.Seek(0, 0); err != nil {
+		t.Fatalf("Failed to seek temp stdin file: %v", err)
 	}
-}
 
-// TestMain tests the main function.
-func TestMainFunction(t *testing.T) {
-	// Set up necessary environment variables and command line arguments
-	os.Setenv("OPENAI_API_KEY", "testapikey")
-	defer os.Unsetenv("OPENAI_API_KEY")
+	// Backup the real stdin and defer restoration
+	oldStdin := os.Stdin
+	defer func() { os.Stdin = oldStdin }()
+	os.Stdin = tempInputFile
 
-	// Set command line arguments
-	os.Args = []string{"cmd", "-silent"}
+	// Capture the stdout
+	oldStdout := os.Stdout
+	tempOutputFile, err := ioutil.TempFile("", "test_stdout")
+	if err != nil {
+		t.Fatalf("Failed to create temp file for stdout: %v", err)
+	}
+	defer func() {
+		os.Stdout = oldStdout
+		os.Remove(tempOutputFile.Name()) // Clean up
+	}()
+	os.Stdout = tempOutputFile
 
-	// Capture the standard output
-	originalStdout := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
-
-	// Call main
+	// Call the function under test
 	main()
 
-	// Restore original stdout
-	w.Close()
-	os.Stdout = originalStdout
+	// Read the output
+	if _, err := tempOutputFile.Seek(0, 0); err != nil {
+		t.Fatalf("Failed to seek temp stdout file: %v", err)
+	}
+	output, err := ioutil.ReadAll(tempOutputFile)
+	if err != nil {
+		t.Fatalf("Failed to read from temp stdout file: %v", err)
+	}
 
-	// Add checks here to validate the output of main, if necessary
+	// Verify the output
+	expectedOutputPart := "Hello, world!" // Adjust based on expected output
+	if !strings.Contains(string(output), expectedOutputPart) {
+		t.Errorf("Expected output to contain %q, got %q", expectedOutputPart, output)
+	}
 }
