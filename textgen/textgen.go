@@ -48,12 +48,16 @@ func runChat(input io.Reader, output io.Writer, client OpenAIClient) error {
 
 func main() {
 	apiKey := os.Getenv("OPENAI_API_KEY")
-	client := openai.NewClient(apiKey)
+	client := openai.NewClient(apiKey) // Ensure this returns a type that satisfies OpenAIClient
 	if err := runChat(os.Stdin, os.Stdout, client); err != nil {
 		fmt.Fprintf(os.Stderr, "runChat error: %v\n", err)
 	}
 }
 
+// MockOpenAIClient is a mock implementation of OpenAIClient for testing.
+type MockOpenAIClient struct{}
+
+// CreateChatCompletion simulates the CreateChatCompletion method of an OpenAIClient.
 func (m *MockOpenAIClient) CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (*openai.ChatCompletionResponse, error) {
 	// Return a mock response
 	return &openai.ChatCompletionResponse{
