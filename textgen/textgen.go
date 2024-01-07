@@ -12,7 +12,7 @@ import (
 
 // OpenAIClient defines the interface for an OpenAI client.
 type OpenAIClient interface {
-	CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (*openai.ChatCompletionResponse, error)
+	CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (openai.ChatCompletionResponse, error)
 }
 
 // runChat handles the chat logic, can be tested with different io.Reader and io.Writer
@@ -58,9 +58,9 @@ func main() {
 type MockOpenAIClient struct{}
 
 // CreateChatCompletion simulates the CreateChatCompletion method of an OpenAIClient.
-func (m *MockOpenAIClient) CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (*openai.ChatCompletionResponse, error) {
+func (m *MockOpenAIClient) CreateChatCompletion(ctx context.Context, req openai.ChatCompletionRequest) (openai.ChatCompletionResponse, error) {
 	// Return a mock response
-	return &openai.ChatCompletionResponse{
+	return openai.ChatCompletionResponse{
 		Choices: []openai.Choice{
 			{
 				Message: openai.Message{Content: "mock response"},
